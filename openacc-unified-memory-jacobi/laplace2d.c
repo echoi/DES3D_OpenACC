@@ -70,10 +70,12 @@ int main(int argc, char** argv)
     while ( error > tol && iter < iter_max ) {
         error = 0.f;
 
-    #pragma acc kernels 
+    #pragma acc kernels
     {
-/*        #pragma acc loop independent */
+        /*#pragma acc loop tile(32,4) device_type(nvidia)*/
+        /*#pragma acc parallel loop reduction(max:error)*/
         for( int j = 1; j < n-1; j++) {
+            /*#pragma acc loop reduction(max:error)*/
             for( int i = 1; i < m-1; i++ ) {
 
                 Anew[j*m+i] = 0.25f * ( A[j*m+i+1] + A[j*m+i-1]
@@ -83,8 +85,10 @@ int main(int argc, char** argv)
             }
         }
 
-/*        #pragma acc loop independent */
+        /*#pragma acc loop tile(32,4) device_type(nvidia)*/
+        /*#pragma acc parallel loop*/
         for( int j = 1; j < n-1; j++) {
+            /*#pragma acc loop*/
             for( int i = 1; i < m-1; i++ ) {
                 A[j*m+i] = Anew[j*m+i];    
             }
